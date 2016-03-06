@@ -4,8 +4,9 @@
   Connections:
   1) VCC -> humidity resistor -> A4
   2) humidity resistor -> 160 Ohm resistor -> GND
-  3) TODO: relay A3 -> relay ?????
-  4) VCC + GND -> relay VCC + GND
+  3) A3 -> relay switch detector 
+  4) VCC -> relay VCC
+  5) GND -> relay GND
 */
 
 //see pins_energia.h for more LED definitions
@@ -25,17 +26,12 @@ void setup() {
   // initialize serial communications at 9600 bps:
   Serial.begin(9600); 
   pinMode(analogRelaySwitchInPin, OUTPUT); 
+  digitalWrite(analogRelaySwitchInPin, LOW);
 }
 
-// the run loop
 void loop() {
-  digitalWrite(analogRelaySwitchInPin, HIGH);
-  
   delay(1000);               // wait for a second
-  digitalWrite(analogRelaySwitchInPin, LOW);
-  // read the analog in value:
   handleNewValue(analogRead(analogHumidityResistorInPin)); 
-//  analogRead(analogRelaySwitchInPin);
   switchIfRequired();
   debugLog();
 }
@@ -51,14 +47,14 @@ void switchIfRequired() {
 }
 
 void turnLuefterOn() {
-  //TODO:
+  digitalWrite(analogRelaySwitchInPin, HIGH);
   Serial.print("\n\n#############\n!!! TURN ON !!!\n#############\n"); 
   isLuefterOn = true;
-  stableCheckCounter = true;
+  stableCheckCounter = 0;
 }
 
 void turnLuefterOff() {
-  //TODO:
+  digitalWrite(analogRelaySwitchInPin, LOW);
   Serial.print("\n\n#############\n!!! TURN OFF !!!\n#############\n"); 
   isLuefterOn = false;
   stableCheckCounter = 0;
