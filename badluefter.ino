@@ -17,8 +17,10 @@ unsigned int movingAverage = 0;
 unsigned int lastMovingAverage = 0;  
 unsigned int stableCheckCounter = 0;  
 unsigned int minStability = 15;  
-int threshold = 1;
+int thresholdToTurnOn = 550;
+int thresholdToTurnOff = 570;
 boolean isLuefterOn = false;
+unsigned int readInterval = 2500;
   
 // the setup routine runs once when you press reset:
 void setup() {   
@@ -27,10 +29,11 @@ void setup() {
   Serial.begin(9600); 
   pinMode(analogRelaySwitchInPin, OUTPUT); 
   digitalWrite(analogRelaySwitchInPin, LOW);
+  
 }
 
 void loop() {
-  delay(1000);               // wait for a second
+  delay(readInterval);               // wait for a second
   handleNewValue(analogRead(analogHumidityResistorInPin)); 
   switchIfRequired();
   debugLog();
@@ -38,9 +41,9 @@ void loop() {
 
 void switchIfRequired() {
   if (isStable()) {
-    if (isLuefterOn && movingAverage < threshold) {
+    if (isLuefterOn && movingAverage < thresholdToTurnOff) {
       turnLuefterOff();
-    } else if (!isLuefterOn && movingAverage >= threshold) {
+    } else if (!isLuefterOn && movingAverage >= thresholdToTurnOn) {
       turnLuefterOn();
     }
   }
@@ -70,6 +73,13 @@ void handleNewValue (int newValue){
   lastMovingAverage = movingAverage;
   movingAverage = (movingAverage + newValue) / 2;
   
+  int threshold = 0;
+  if (isLuefterOn) {
+    threshold = thresholdToTurnOff;
+  } else {
+    threshold = thresholdToTurnOn;
+  }
+    
   if (lastMovingAverage >= threshold && movingAverage < threshold ) {
     stableCheckCounter = 0;
   } else if (lastMovingAverage < threshold && movingAverage >= threshold ) {
