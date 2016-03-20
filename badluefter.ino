@@ -17,8 +17,8 @@ unsigned int movingAverage = 0;
 unsigned int lastMovingAverage = 0;  
 unsigned int stableCheckCounter = 0;  
 unsigned int minStability = 15;  
-int thresholdToTurnOn = 430;
-int thresholdToTurnOff = 470;
+int thresholdToTurnOn = 350;
+int thresholdToTurnOff = 390;
 boolean isLuefterOn = false;
 unsigned int readInterval = 2500;
   
