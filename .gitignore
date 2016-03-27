@@ -7,7 +7,4 @@ build
 OpenSSL-for-iOS.xcodeproj/project.xcworkspace/xcuserdata
 include/openssl
 *.framework
-<<<<<<< HEAD
 ._*
-=======
->>>>>>> 7e586028b09359adbebb3603ea4f3a7bde685fa2
