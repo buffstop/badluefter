@@ -4,8 +4,9 @@
   Connections:
   1) VCC -> humidity resistor -> A4
   2) humidity resistor -> 160 Ohm resistor -> GND
-  3) TODO: relay A3 -> relay ?????
-  4) VCC + GND -> relay VCC + GND
+  3) A3 -> relay switch detector 
+  4) VCC -> relay VCC
+  5) GND -> relay GND
 */
 
 //see pins_energia.h for more LED definitions
@@ -16,8 +17,10 @@ unsigned int movingAverage = 0;
 unsigned int lastMovingAverage = 0;  
 unsigned int stableCheckCounter = 0;  
 unsigned int minStability = 15;  
-int threshold = 1;
+int thresholdToTurnOn = 350;
+int thresholdToTurnOff = 430;
 boolean isLuefterOn = false;
+unsigned int readInterval = 2500;
   
 // the setup routine runs once when you press reset:
 void setup() {   
@@ -25,40 +28,36 @@ void setup() {
   // initialize serial communications at 9600 bps:
   Serial.begin(9600); 
   pinMode(analogRelaySwitchInPin, OUTPUT); 
+  digitalWrite(analogRelaySwitchInPin, LOW);
+  
 }
 
-// the run loop
 void loop() {
-  digitalWrite(analogRelaySwitchInPin, HIGH);
-  
-  delay(1000);               // wait for a second
-  digitalWrite(analogRelaySwitchInPin, LOW);
-  // read the analog in value:
+  delay(readInterval);               // wait for a second
   handleNewValue(analogRead(analogHumidityResistorInPin)); 
-//  analogRead(analogRelaySwitchInPin);
   switchIfRequired();
   debugLog();
 }
 
 void switchIfRequired() {
   if (isStable()) {
-    if (isLuefterOn && movingAverage < threshold) {
+    if (isLuefterOn && movingAverage < thresholdToTurnOff) {
       turnLuefterOff();
-    } else if (!isLuefterOn && movingAverage >= threshold) {
+    } else if (!isLuefterOn && movingAverage >= thresholdToTurnOn) {
       turnLuefterOn();
     }
   }
 }
 
 void turnLuefterOn() {
-  //TODO:
+  digitalWrite(analogRelaySwitchInPin, HIGH);
   Serial.print("\n\n#############\n!!! TURN ON !!!\n#############\n"); 
   isLuefterOn = true;
-  stableCheckCounter = true;
+  stableCheckCounter = 0;
 }
 
 void turnLuefterOff() {
-  //TODO:
+  digitalWrite(analogRelaySwitchInPin, LOW);
   Serial.print("\n\n#############\n!!! TURN OFF !!!\n#############\n"); 
   isLuefterOn = false;
   stableCheckCounter = 0;
@@ -74,6 +73,13 @@ void handleNewValue (int newValue){
   lastMovingAverage = movingAverage;
   movingAverage = (movingAverage + newValue) / 2;
   
+  int threshold = 0;
+  if (isLuefterOn) {
+    threshold = thresholdToTurnOff;
+  } else {
+    threshold = thresholdToTurnOn;
+  }
+    
   if (lastMovingAverage >= threshold && movingAverage < threshold ) {
     stableCheckCounter = 0;
   } else if (lastMovingAverage < threshold && movingAverage >= threshold ) {
