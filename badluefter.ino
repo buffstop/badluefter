@@ -14,11 +14,10 @@ const int analogHumidityResistorInPin = A4;  // Analog input pin that the humini
 const int analogRelaySwitchInPin = A3;  // Analog output pin that the relay is attached to
 int sensorValue = 0;        // last read value
 unsigned int movingAverage = 0;   
-unsigned int lastMovingAverage = 0;  
 unsigned int stableCheckCounter = 0;  
 unsigned int minStability = 15;  
-int thresholdToTurnOn = 310;
-int thresholdToTurnOff = 430;
+int thresholdToTurnOn = 315;
+int thresholdToTurnOff = 445;
 boolean isLuefterOn = false;
 unsigned int readInterval = 2500;
   
@@ -70,7 +69,7 @@ boolean isStable() {
 void handleNewValue (int newValue){
   sensorValue = newValue;
 
-  lastMovingAverage = movingAverage;
+  unsigned int lastMovingAverage = movingAverage;  
   movingAverage = (movingAverage + newValue) / 2;
   
   int threshold = 0;
@@ -80,9 +79,9 @@ void handleNewValue (int newValue){
     threshold = thresholdToTurnOn;
   }
     
-  if (lastMovingAverage >= threshold && movingAverage < threshold ) {
+  if (lastMovingAverage > threshold && movingAverage < threshold ) {
     stableCheckCounter = 0;
-  } else if (lastMovingAverage < threshold && movingAverage >= threshold ) {
+  } else if (lastMovingAverage < threshold && movingAverage > threshold ) {
     stableCheckCounter = 0;
   } else {
     stableCheckCounter++;
